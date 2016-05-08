@@ -10,6 +10,9 @@ def doFlip(
 	""" 
 	Perform random flip
 	"""
+	image = np.squeeze(image)
+	label = np.squeeze(label)
+
 	assert((image.shape[0] == label.shape[0]) and (image.shape[1] == label.shape[1]))
 	shape = image.shape
 	dimx, dimy = shape
@@ -67,6 +70,9 @@ def doSquareRotate(
 	""" 
 	Perform random rotation
 	"""
+	image = np.squeeze(image)
+	label = np.squeeze(label)
+
 	assert((image.shape[0] == label.shape[0]) and (image.shape[1] == label.shape[1]))
 	shape = image.shape
 	dimx, dimy = shape
@@ -120,23 +126,23 @@ def doElastic(
 	"""
 
 	# Squeeze the singleton dimensional of image
-	# image = np.squeeze(image)
-	# label = np.squeeze(label)
+	image = np.squeeze(image)
+	label = np.squeeze(label)
 
 	# 012 to 120
 	# image = np.transpose(image, (1, 2, 0))
 	# label = np.transpose(label, (1, 2, 0))
+	if Verbose:
+		print "Perform  transformation using elastic deformation"
+		print "Shape of image: ", image.shape
+		print "Shape of label: ", label.shape
+		pass
 
 	# Retrieve image shape
 	assert((image.shape[0] == label.shape[0]) and (image.shape[1] == label.shape[1]))
 	shape = image.shape
 	dimx, dimy = shape
 	
-	if Verbose:
-		print "Perform  transformation using elastic deformation"
-		print "Shape of image: ", image.shape
-		print "Shape of label: ", label.shape
-		pass
 
 
 	# http://stackoverflow.com/questions/11379214/random-vector-plot-in-matplotlib
@@ -208,22 +214,24 @@ def addNoise(
 	image, 
 	label,
 	noise_type="gauss",
-	Verbose = True):
+	Verbose = False):
 	"""
 	Add noise to the image, not the label
 	"""
+	image = np.squeeze(image)
+	label = np.squeeze(label)
 	# Retrieve image shape
 	assert((image.shape[0] == label.shape[0]) and (image.shape[1] == label.shape[1]))
 	shape = image.shape
 	dimx, dimy = shape
 	
 	if Verbose:
-		print "Perform  transformation using elastic deformation"
+		print "Perform random noise"
 		print "Shape of image: ", image.shape
 		print "Shape of label: ", label.shape
 		pass
 	if noise_type == "gauss":
-		mean = 10 # 0 0.5
+		mean = 0 # 0 0.5
 		#var = 0.1
 	   	#sigma = var**0.5
 		gauss = np.random.normal(mean,1,shape)
@@ -231,8 +239,8 @@ def addNoise(
 		noisy = image + gauss
 	if Verbose:
 		# Show image
-		plt.imshow(np.hstack( (np.squeeze(gauss), 
-							   np.squeeze(noisy), 
+		plt.imshow(np.hstack( (np.squeeze(noisy), 
+							   np.squeeze(image), 
 							   np.squeeze(image-noisy)
 							  ), 
 							  ), cmap = plt.get_cmap('gray'))
