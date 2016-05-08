@@ -316,8 +316,8 @@ def symmetric_residual():
 		no_bias		=	True, 
 		workspace	=	workspace_default)
 	
-	ccat3b = mx.symbol.Concat(*[up3b, res3a])
-	# ccat3b = up3b + res3a
+	# ccat3b = mx.symbol.Concat(*[up3b, res3a])
+	ccat3b = up3b + res3a
 	ccat3b = conv_factory(
 		data		= 	ccat3b, 
 		num_filter	=	64, 
@@ -405,8 +405,62 @@ def symmetric_residual():
 		stride		=	(1,1), 
 		pad			= 	(1,1), 
 		act_type = 'relu')
+	# ####################################################################
+	# out = conv1b
+	# numclass = 2
+	# # After up
+	# # Inception unit for segmentation
+	# conv0b = conv_factory(
+		# data		= 	out, 
+		# num_filter	=	numclass, 
+		# kernel		=	(1,1), 
+		# stride		=	(1,1), 
+		# pad			= 	(0,0), 
+		# act_type = 'relu')
+	
 	####################################################################
-	out = conv1b
+	scale = 16
+	up4c = mx.symbol.Deconvolution(
+		data        =   conv_mid, 
+		kernel      =   (2*scale, 2*scale), 
+		stride      =   (scale, scale), 
+		pad         =   (scale/2, scale/2), 
+		num_filter  =   96, 
+		no_bias     =   True, 
+		workspace   =   workspace_default)
+	
+	scale = 8
+	up3c = mx.symbol.Deconvolution(
+		data        =   conv4b, 
+		kernel      =   (2*scale, 2*scale), 
+		stride      =   (scale, scale), 
+		pad         =   (scale/2, scale/2), 
+		num_filter  =   96, 
+		no_bias     =   True, 
+		workspace   =   workspace_default)
+	scale = 4
+	up2c = mx.symbol.Deconvolution(
+		data        =   conv3b, 
+		kernel      =   (2*scale, 2*scale), 
+		stride      =   (scale, scale), 
+		pad         =   (scale/2, scale/2), 
+		num_filter  =   96, 
+		no_bias     =   True, 
+		workspace   =   workspace_default)
+	scale = 2
+	up1c = mx.symbol.Deconvolution(
+		data        =   conv2b, 
+		kernel      =   (2*scale, 2*scale), 
+		stride      =   (scale, scale), 
+		pad         =   (scale/2, scale/2), 
+		num_filter  =   96, 
+		no_bias     =   True, 
+		workspace   =   workspace_default)
+	# fusion = mx.symbol.Concat(*[conv1b, up4c, up3c, up2c, up1c])
+	fusion = conv1b + up4c + up3c + up2c + up1c
+	####################################################################
+	# out = conv1b
+	out = fusion
 	numclass = 2
 	# After up
 	# Inception unit for segmentation
@@ -417,6 +471,7 @@ def symmetric_residual():
 		stride		=	(1,1), 
 		pad			= 	(0,0), 
 		act_type = 'relu')
+	####################################################################
 	
 	# bn = mx.symbol.BatchNorm(data=conv0b)
 	# act = mx.symbol.Activation(data = bn, act_type='relu')
